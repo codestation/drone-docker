@@ -162,6 +162,11 @@ func main() {
 			Usage:  "squash the layers at build time",
 			EnvVar: "PLUGIN_SQUASH",
 		},
+		cli.BoolFlag{
+			Name:   "stream",
+			Usage:  "stream the build context",
+			EnvVar: "PLUGIN_STREAM",
+		},
 		cli.BoolTFlag{
 			Name:   "pull-image",
 			Usage:  "force pull base image at build time",
@@ -250,6 +255,7 @@ func run(c *cli.Context) error {
 			ArgsEnv:     c.StringSlice("args-from-env"),
 			Target:      c.String("target"),
 			Squash:      c.Bool("squash"),
+			Stream:      c.Bool("stream"),
 			Pull:        c.BoolT("pull-image"),
 			CacheFrom:   c.StringSlice("cache-from"),
 			Compress:    c.Bool("compress"),
