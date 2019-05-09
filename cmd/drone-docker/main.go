@@ -182,6 +182,11 @@ func main() {
 			Usage:  "docker repository",
 			EnvVar: "PLUGIN_REPO",
 		},
+		cli.BoolFlag{
+			Name:   "push-target",
+			Usage:  "push the target image along the final image",
+			EnvVar: "PLUGIN_PUSH_TARGET",
+		},
 		cli.StringSliceFlag{
 			Name:   "custom-labels",
 			Usage:  "additional k=v labels",
@@ -263,6 +268,7 @@ func run(c *cli.Context) error {
 			Labels:      c.StringSlice("custom-labels"),
 			LabelSchema: c.StringSlice("label-schema"),
 			NoCache:     c.Bool("no-cache"),
+			PushTarget:  c.Bool("push-target"),
 		},
 		Daemon: docker.Daemon{
 			Registry:      c.String("docker.registry"),
