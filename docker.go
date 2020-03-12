@@ -2,7 +2,6 @@ package docker
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -55,6 +54,7 @@ type (
 		NoCache     bool     // Docker build no-cache
 		Stream      bool     // Docker build stream
 		PushTarget  bool     // build final image and push built target
+		AddHost     []string // Docker build add-host
 	}
 
 	// Plugin defines the Docker plugin parameters.
@@ -71,18 +71,7 @@ type (
 func (p Plugin) Exec() error {
 	// start the Docker daemon server
 	if !p.Daemon.Disabled {
-		cmd := commandDaemon(p.Daemon)
-		if p.Daemon.Debug {
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-		} else {
-			cmd.Stdout = ioutil.Discard
-			cmd.Stderr = ioutil.Discard
-		}
-		go func() {
-			trace(cmd)
-			cmd.Run()
-		}()
+		p.startDaemon()
 	}
 
 	// poll the docker daemon until it is started. This ensures the daemon is
@@ -180,9 +169,6 @@ func (p Plugin) Exec() error {
 	return nil
 }
 
-const dockerExe = "/usr/local/bin/docker"
-const dockerdExe = "/usr/local/bin/dockerd"
-
 // helper function to create the docker login command.
 func commandLogin(login Login) *exec.Cmd {
 	if login.Email != "" {
@@ -258,6 +244,9 @@ func commandBuild(build Build) *exec.Cmd {
 	}
 	for _, arg := range build.Args {
 		args = append(args, "--build-arg", arg)
+	}
+	for _, host := range build.AddHost {
+		args = append(args, "--add-host", host)
 	}
 	if build.Target != "" {
 		args = append(args, "--target", build.Target)
